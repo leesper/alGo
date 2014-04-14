@@ -261,6 +261,60 @@ func (wqupc *WeightedQuickUnionPathCompUF) Count() int {
 	return wqupc.count
 }
 
+type WeightedQuickUnionByHeight struct {
+	ids		[]int
+	hgt		[]int
+	count	int
+}
+
+func NewWeightedQuickUnionByHeight(N int) *WeightedQuickUnionByHeight {
+	if N < 1 {
+		panic(fmt.Sprintf("Invalid parameter N %d", N))
+	}
+	ids := make([]int, N)
+	hgt := make([]int, N)
+	for i := 0; i < N; i++ {
+		ids[i] = i
+		hgt[i] = 0
+	}
+	return &WeightedQuickUnionByHeight{ids, hgt, N}
+}
+
+func (wquh *WeightedQuickUnionByHeight) Union(p, q int) {
+	pRoot := wquh.Find(p)
+	qRoot := wquh.Find(q)
+	if pRoot == qRoot {
+		return
+	}
+	// make shorter root point to taller one
+	if wquh.hgt[pRoot] < wquh.hgt[qRoot] {
+		wquh.ids[pRoot] = qRoot
+	} else if wquh.hgt[pRoot] == wquh.hgt[qRoot] {
+		wquh.ids[qRoot] = pRoot
+		wquh.hgt[pRoot]++
+	} else {
+		wquh.ids[qRoot] = pRoot
+	}
+	wquh.count--
+}
+
+func (wquh *WeightedQuickUnionByHeight) Find(p int) int {
+	for p != wquh.ids[p] {
+		p = wquh.ids[p]
+	}
+	return p
+}
+
+func (wquh *WeightedQuickUnionByHeight) Connected(p, q int) bool {
+	pRoot := wquh.Find(p)
+	qRoot := wquh.Find(q)
+	return pRoot == qRoot
+}
+
+func (wquh *WeightedQuickUnionByHeight) Count() int {
+	return wquh.count
+}
+
 func fetchFromFile(fname string, chnl chan<- int) {
 	fh, err := os.Open(fname)
 	if err != nil {
@@ -299,7 +353,7 @@ func main() {
 	tinyChan := make(chan int)
 	go fetchFromFile(tinyFile, tinyChan)
 	sz := <-tinyChan
-	qfuf := NewQuickFindUF(sz)
+	qfuf := NewWeightedQuickUnionByHeight(sz)
 	var p, q int
 	for true {
 		p = <-tinyChan
@@ -347,7 +401,7 @@ func main() {
 	largeChan := make(chan int)
 	go fetchFromFile(largeFile, largeChan)
 	sz = <-largeChan
-	wquf := NewWeightedQuickUnionPathCompUF(sz)
+	wquf := NewWeightedQuickUnionByHeight(sz)
 	for true {
 		p = <-largeChan
 		if p == -1 {
