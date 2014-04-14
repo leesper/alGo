@@ -100,6 +100,167 @@ func (qu *QuickUnionUF) Count() int {
 	return qu.count
 }
 
+// quick-union with path compression
+type QuickUnionPathCompUF QuickUnionUF
+
+func NewQuickUnionPathCompUF(N int) *QuickUnionPathCompUF {
+	if N < 1 {
+		panic(fmt.Sprintf("Invalid parameter N %d", N))
+	}
+	ids := make([]int, N)
+	for i := 0; i < len(ids); i++ {
+		ids[i] = i
+	}
+	count := N
+	return &QuickUnionPathCompUF{ids, count}
+}
+
+func (qupc *QuickUnionPathCompUF) Union(p, q int) {
+	pRoot := qupc.Find(p)
+	qRoot := qupc.Find(q)
+	
+	if pRoot == qRoot {
+		return
+	}
+	
+	qupc.ids[pRoot] = qRoot
+	qupc.count--
+}
+
+func (qupc *QuickUnionPathCompUF) Find(p int) int {
+	n := p
+	for p != qupc.ids[p] {
+		p = qupc.ids[p]
+	}
+	// now p is the root node
+	for n != qupc.ids[n] {
+		t := qupc.ids[n]
+		qupc.ids[n] = p	// make n links directly to the root
+		n = t
+	}
+	return p
+}
+
+func (qupc *QuickUnionPathCompUF) Connected(p, q int) bool {
+	pRoot := qupc.Find(p)
+	qRoot := qupc.Find(q)
+	return pRoot == qRoot
+}
+
+func (qupc *QuickUnionPathCompUF) Count() int {
+	return qupc.count
+}
+
+type WeightedQuickUnionUF struct {
+	ids		[]int
+	sz		[]int
+	count	int
+}
+
+func NewWeightedQuickUnionUF(N int) *WeightedQuickUnionUF {
+	if N < 1 {
+		fmt.Sprintf("Invalid parameter N: %d", N)
+	}
+	ids := make([]int, N)
+	for i := 0; i < len(ids); i++ {
+		ids[i] = i
+	}
+	sz := make([]int, N)
+	for i := 0; i < len(sz); i++ {
+		sz[i] = 1
+	}
+	return &WeightedQuickUnionUF{ids, sz, N}
+}
+
+func (wquf *WeightedQuickUnionUF) Union(p, q int) {
+	pRoot := wquf.Find(p)
+	qRoot := wquf.Find(q)
+	if pRoot == qRoot {
+		return
+	}
+	if wquf.sz[pRoot] < wquf.sz[qRoot] {
+		wquf.ids[pRoot] = qRoot
+		wquf.sz[qRoot] += wquf.sz[pRoot]
+	} else {
+		wquf.ids[qRoot] = pRoot
+		wquf.sz[pRoot] += wquf.sz[qRoot]
+	}
+	wquf.count--
+}
+
+func (wquf *WeightedQuickUnionUF) Find(p int) int {
+	for p != wquf.ids[p] {
+		p = wquf.ids[p]
+	}
+	return p
+}
+
+func (wquf *WeightedQuickUnionUF) Connected(p, q int) bool {
+	pRoot := wquf.Find(p)
+	qRoot := wquf.Find(q)
+	return pRoot == qRoot
+}
+
+func (wquf *WeightedQuickUnionUF) Count() int {
+	return wquf.count
+}
+
+type WeightedQuickUnionPathCompUF WeightedQuickUnionUF
+
+func NewWeightedQuickUnionPathCompUF(N int) *WeightedQuickUnionPathCompUF {
+	if N < 1 {
+		fmt.Sprintf("Invalid parameter N: %d", N)
+	}
+	ids := make([]int, N)
+	for i := 0; i < len(ids); i++ {
+		ids[i] = i
+	}
+	sz := make([]int, N)
+	for i := 0; i < len(sz); i++ {
+		sz[i] = 1
+	}
+	return &WeightedQuickUnionPathCompUF{ids, sz, N}
+}
+
+func (wqupc *WeightedQuickUnionPathCompUF) Union(p, q int) {
+	pRoot := wqupc.Find(p)
+	qRoot := wqupc.Find(q)
+	if pRoot == qRoot {
+		return
+	}
+	if wqupc.sz[pRoot] < wqupc.sz[qRoot] {
+		wqupc.ids[pRoot] = qRoot
+		wqupc.sz[qRoot] += wqupc.sz[pRoot]
+	} else {
+		wqupc.ids[qRoot] = pRoot
+		wqupc.sz[pRoot] += wqupc.sz[qRoot]
+	}
+	wqupc.count--
+}
+
+func (wqupc *WeightedQuickUnionPathCompUF) Find(p int) int {
+	root := p
+	for root != wqupc.ids[root] {
+		root = wqupc.ids[root]
+	}
+	for p != root {
+		t := wqupc.ids[p]
+		wqupc.ids[p] = root
+		p = t
+	}
+	return root
+}
+
+func (wqupc *WeightedQuickUnionPathCompUF) Connected(p, q int) bool {
+	pRoot := wqupc.Find(p)
+	qRoot := wqupc.Find(q)
+	return pRoot == qRoot
+}
+
+func (wqupc *WeightedQuickUnionPathCompUF) Count() int {
+	return wqupc.count
+}
+
 func fetchFromFile(fname string, chnl chan<- int) {
 	fh, err := os.Open(fname)
 	if err != nil {
@@ -132,7 +293,7 @@ func fetchFromFile(fname string, chnl chan<- int) {
 }
 var tinyFile string = "tinyUF.txt"
 var mediumFile string = "mediumUF.txt"
-//var largeFile string = "largeUF.txt"
+var largeFile string = "largeUF.txt"
 func main() {
 	fmt.Println("--- Quick-Find for tinyUF.txt ---")
 	tinyChan := make(chan int)
@@ -158,11 +319,12 @@ func main() {
 	}
 	fmt.Printf("%d components\n", qfuf.Count())
 	
-	fmt.Println("--- Quick-Union for mediumUF.txt ---")
+	/*
+	fmt.Println("--- Quick-Union with path compression for mediumUF.txt ---")
 	medChan := make(chan int)
 	go fetchFromFile(mediumFile, medChan)
 	sz = <-medChan
-	quuf := NewQuickUnionUF(sz)
+	qupc := NewQuickUnionPathCompUF(sz)
 	for true {
 		p = <-medChan
 		if p == -1 {
@@ -173,10 +335,33 @@ func main() {
 		if q == -1 {
 			break
 		}
-		if !quuf.Connected(p, q) {
-			quuf.Union(p, q)
+		if !qupc.Connected(p, q) {
+			qupc.Union(p, q)
 			fmt.Printf("%d %d\n", p, q)
 		}
 	}
-	fmt.Printf("%d components\n", quuf.Count())
+	fmt.Printf("%d components\n", qupc.Count())
+	*/
+	
+	fmt.Println("--- Weighted Quick-Union for largeUF.txt ---")
+	largeChan := make(chan int)
+	go fetchFromFile(largeFile, largeChan)
+	sz = <-largeChan
+	wquf := NewWeightedQuickUnionPathCompUF(sz)
+	for true {
+		p = <-largeChan
+		if p == -1 {
+			break
+		}
+		
+		q = <-largeChan
+		if q == -1 {
+			break
+		}
+		if !wquf.Connected(p, q) {
+			wquf.Union(p, q)
+			fmt.Printf("%d %d\n", p, q)
+		}
+	}
+	fmt.Printf("%d components\n", wquf.Count())
 }
