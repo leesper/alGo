@@ -315,6 +315,57 @@ func (wquh *WeightedQuickUnionByHeight) Count() int {
 	return wquh.count
 }
 
+type WeightedQuickUnionPathHalfUF WeightedQuickUnionUF
+
+func NewWeightedQuickUnionPathHalfUF(N int) *WeightedQuickUnionPathHalfUF {
+	if N < 1 {
+		fmt.Sprintf("Invalid parameter N: %d", N)
+	}
+	ids := make([]int, N)
+	for i := 0; i < len(ids); i++ {
+		ids[i] = i
+	}
+	sz := make([]int, N)
+	for i := 0; i < len(sz); i++ {
+		sz[i] = 1
+	}
+	return &WeightedQuickUnionPathHalfUF{ids, sz, N}
+}
+
+func (wquph *WeightedQuickUnionPathHalfUF) Union(p, q int) {
+	pRoot := wquph.Find(p)
+	qRoot := wquph.Find(q)
+	if pRoot == qRoot {
+		return
+	}
+	if wquph.sz[pRoot] < wquph.sz[qRoot] {
+		wquph.ids[pRoot] = qRoot
+		wquph.sz[qRoot] += wquph.sz[pRoot]
+	} else {
+		wquph.ids[qRoot] = pRoot
+		wquph.sz[pRoot] += wquph.sz[qRoot]
+	}
+	wquph.count--
+}
+
+func (wquph *WeightedQuickUnionPathHalfUF) Find(p int) int {
+	for p != wquph.ids[p] {
+		wquph.ids[p] = wquph.ids[wquph.ids[p]]	// link to its grandparent
+		p = wquph.ids[p]		// jump to grandparent(ignore parent)
+	}
+	return p
+}
+
+func (wquph *WeightedQuickUnionPathHalfUF) Connected(p, q int) bool {
+	pRoot := wquph.Find(p)
+	qRoot := wquph.Find(q)
+	return pRoot == qRoot
+}
+
+func (wquph *WeightedQuickUnionPathHalfUF) Count() int {
+	return wquph.count
+}
+
 func fetchFromFile(fname string, chnl chan<- int) {
 	fh, err := os.Open(fname)
 	if err != nil {
@@ -401,7 +452,7 @@ func main() {
 	largeChan := make(chan int)
 	go fetchFromFile(largeFile, largeChan)
 	sz = <-largeChan
-	wquf := NewWeightedQuickUnionByHeight(sz)
+	wquf := NewWeightedQuickUnionPathHalfUF(sz)
 	for true {
 		p = <-largeChan
 		if p == -1 {
