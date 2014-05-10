@@ -152,11 +152,19 @@ func localMinRecur(arr []int, low, high int) int {
 		return mid
 	}
 	// search in the half with the smaller neighbor
-	if arr[mid - 1] < arr[mid + 1] {
-		return localMinRecur(arr, low, mid - 1)
-	} else {
-		return localMinRecur(arr, mid + 1, high)
+	var mLeft, mRight int
+	if arr[mid - 1] < arr[mid] {
+		mLeft = localMinRecur(arr, low, mid - 1)
 	}
+	
+	if arr[mid + 1] < arr[mid] {
+		mRight = localMinRecur(arr, mid + 1, high)
+	}
+	
+	if mLeft != -1 {
+		return mLeft
+	}
+	return mRight
 }
 
 // 3lgN
