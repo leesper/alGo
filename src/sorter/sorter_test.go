@@ -79,12 +79,12 @@ func TestMultiKeySorter(t *testing.T) {
 		return p1.mass < p2.mass
 	}
 	
-	sorter.By(name).SelectionSort(planets)
+	sorter.By(name).Sort(planets)
 	fmt.Println("By name: ", planets)
 	
-	sorter.By(distance).SelectionSort(planets)
+	sorter.By(distance).Sort(planets)
 	fmt.Println("By distance: ", planets)
 	
-	sorter.By(mass).SelectionSort(planets)
+	sorter.By(mass).Sort(planets)
 	fmt.Println("By mass: ", planets)
 }
