@@ -40,7 +40,7 @@ func TestSelection(t *testing.T) {
 	}
 
 	fmt.Println(people)
-	sorter.Selection(ByAge(people))
+	sorter.Selection(ByAge(people), 0, len(people))
 	fmt.Println(people)
 }
 
@@ -101,7 +101,7 @@ func TestInsertion(t *testing.T) {
 	}
 
 	fmt.Println(people)
-	sorter.Insertion(ByAge(people))
+	sorter.Insertion(ByAge(people), 0, len(people))
 	fmt.Println(people)
 }
 
@@ -114,6 +114,6 @@ func TestShell(t *testing.T) {
 		{"Jenny", 26},
 	}
 	fmt.Println(people)
-	sorter.Shell(ByAge(people))
+	sorter.Shell(ByAge(people), 0, len(people))
 	fmt.Println(people)
 }

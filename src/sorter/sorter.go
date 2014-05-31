@@ -61,36 +61,30 @@ func (by By) Sort(coll interface{}) {
 		coll:		coll,
 		lesser:		by,
 	}
-	Shell(mks)
+	Shell(mks, 0, mks.Length())
 }
 
-// Selection sort
-func Selection(coll Sortable) {
-	N := coll.Length()
-	for i := 0; i < N; i++ {
+// Selection sorts coll[bgn..end)
+func Selection(coll Sortable, bgn, end int) {
+	for i := bgn; i < end; i++ {
 		min := i
-		for j := i + 1; j < N; j++ {
-			if coll.Less(j, min) {
-				min = j
-			}
+		for j := i + 1; j < end && coll.Less(j, min); j++ {
+			min = j
 		}
 		coll.Exchange(i, min)
 	}
 }
 
-// Insertion sort
-func Insertion(coll Sortable) {
-	N := coll.Length()
-	for i := 1; i < N; i++ {
-		for j := i; j > 0; j-- {
-			if coll.Less(j, j - 1) {
-				coll.Exchange(j, j - 1)
-			}
+// Insertion sorts coll[bgn..end)
+func Insertion(coll Sortable, bgn, end int) {
+	for i := bgn; i < end; i++ {
+		for j := i; j > bgn && coll.Less(j, j-1); j-- {
+			coll.Exchange(j, j - 1)
 		}
 	}
 }
 
-// Shell sort
+/* The original shell sort proto type
 func Shell(coll Sortable) {
 	N := coll.Length()
 	h := 1
@@ -99,10 +93,26 @@ func Shell(coll Sortable) {
 	}
 	for h >= 1 {
 		for i := h; i < N; i++ {
-			for j := i; j > 0; j -= h {
+			for j := i; j >= h; j -= h {
 				if coll.Less(j, j - h) {
 					coll.Exchange(j, j - h)
 				}
+			}
+		}
+		h = h / 3
+	}
+}
+*/
+
+func Shell(coll Sortable, bgn, end int) {
+	h := 1
+	for h < (end - bgn) / 3 {
+		h = 3 * h + 1	// making incremental sequences
+	}
+	for h >= 1 {
+		for i := h; i < (end - bgn); i++ {
+			for j := i; j >= h && coll.Less(j, j - h); j -= h {
+				coll.Exchange(j, j - h)
 			}
 		}
 		h = h / 3
