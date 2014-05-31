@@ -104,6 +104,7 @@ func Shell(coll Sortable) {
 }
 */
 
+// Shell sorts coll[bgn..end)
 func Shell(coll Sortable, bgn, end int) {
 	h := 1
 	for h < (end - bgn) / 3 {
