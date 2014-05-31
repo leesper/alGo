@@ -61,12 +61,12 @@ func (by By) Sort(coll interface{}) {
 		coll:		coll,
 		lesser:		by,
 	}
-	Selection(mks)
+	Shell(mks)
 }
 
 // Selection sort
 func Selection(coll Sortable) {
-	N := coll.Length();
+	N := coll.Length()
 	for i := 0; i < N; i++ {
 		min := i
 		for j := i + 1; j < N; j++ {
@@ -78,3 +78,33 @@ func Selection(coll Sortable) {
 	}
 }
 
+// Insertion sort
+func Insertion(coll Sortable) {
+	N := coll.Length()
+	for i := 1; i < N; i++ {
+		for j := i; j > 0; j-- {
+			if coll.Less(j, j - 1) {
+				coll.Exchange(j, j - 1)
+			}
+		}
+	}
+}
+
+// Shell sort
+func Shell(coll Sortable) {
+	N := coll.Length()
+	h := 1
+	for h < N / 3 {
+		h = 3 * h + 1	// making incremental sequences
+	}
+	for h >= 1 {
+		for i := h; i < N; i++ {
+			for j := i; j > 0; j -= h {
+				if coll.Less(j, j - h) {
+					coll.Exchange(j, j - h)
+				}
+			}
+		}
+		h = h / 3
+	}
+}

@@ -31,6 +31,7 @@ func (b ByAge) Less(i, j int) bool {
 }
 
 func TestSelection(t *testing.T) {
+	fmt.Println("====== Selection Sort ======")
 	people := []Person{
 		{"Bob", 31},
 		{"John", 42},
@@ -54,6 +55,7 @@ func (p *Planet) String() string {
 }
 
 func TestMultiKeySorter(t *testing.T) {
+	fmt.Println("====== Multi Key Sorter ======")
 	planets := []Planet {
 		{"Mercury", 0.055, 0.4},
 		{"Venus", 0.815, 0.7},
@@ -87,4 +89,31 @@ func TestMultiKeySorter(t *testing.T) {
 	
 	sorter.By(mass).Sort(planets)
 	fmt.Println("By mass: ", planets)
+}
+
+func TestInsertion(t *testing.T) {
+	fmt.Println("====== Insertion Sort ======")
+	people := []Person{
+		{"Bob", 31},
+		{"John", 42},
+		{"Michael", 17},
+		{"Jenny", 26},
+	}
+
+	fmt.Println(people)
+	sorter.Insertion(ByAge(people))
+	fmt.Println(people)
+}
+
+func TestShell(t *testing.T) {
+	fmt.Println("====== Shell Sort ======")
+	people := []Person{
+		{"Bob", 31},
+		{"John", 42},
+		{"Michael", 17},
+		{"Jenny", 26},
+	}
+	fmt.Println(people)
+	sorter.Shell(ByAge(people))
+	fmt.Println(people)
 }
