@@ -257,7 +257,7 @@ func HeapSort(arr []int) {
 		sink(arr, k, N)
 	}
 	for N > 1 {
-		exch(arr, 1, N)
+		excher(arr, 1, N)
 		N--
 		sink(arr, 1, N)
 	}
@@ -266,17 +266,21 @@ func HeapSort(arr []int) {
 func sink(arr []int, k, N int) {
 	for 2*k <= N {
 		j := 2 * k
-		if j < N && arr[j-1] < arr[j] {
+		if j < N && lesser(arr, j, j+1) {
 			j++
 		}
-		if arr[k-1] > arr[j-1] {
+		if !lesser(arr, k, j) {
 			break
 		}
-		arr[k-1], arr[j-1] = arr[j-1], arr[k-1]
+		excher(arr, k, j)
 		k = j
 	}
 }
 
-func exch(arr []int, i, j int) {
+func lesser(arr []int, i, j int) bool {
+	return arr[i-1] < arr[j-1]
+}
+
+func excher(arr []int, i, j int) {
 	arr[i-1], arr[j-1] = arr[j-1], arr[i-1]
 }
